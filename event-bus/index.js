@@ -19,7 +19,8 @@ app.post('/events', async (req, res) => {
   const services = [
     'http://localhost:4001/events', // Posts
     'http://localhost:4002/events', // Comments
-    'http://localhost:4003/events', // Query (we'll create this next)
+    'http://localhost:4003/events', // Query
+    'http://localhost:4004/events', // Moderation
   ];
 
   for (const url of services) {
@@ -34,7 +35,6 @@ app.post('/events', async (req, res) => {
   res.send({ status: 'OK' });
 });
 
-// Get all events (for service synchronization)
 app.get('/events', (req, res) => {
   console.log(`Returning ${events.length} events`);
   res.send(events);

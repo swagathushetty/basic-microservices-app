@@ -29,8 +29,10 @@ app.post('/posts/:id/comments', async (req, res) => {
 
   comments.push({
     id: commentId,
-    content
-  });
+    content,
+    status: 'pending',
+    version:0
+  })
 
   commentsByPostId[postId] = comments;
 
@@ -42,7 +44,8 @@ app.post('/posts/:id/comments', async (req, res) => {
     data: {
       id: commentId,
       content,
-      postId
+      postId,
+      version:0
     }
   }).catch(err => {
     console.log('Error sending event:', err.message);
@@ -51,11 +54,48 @@ app.post('/posts/:id/comments', async (req, res) => {
   res.status(201).send(comments);
 });
 
-// Receive events from event bus
-app.post('/events', (req, res) => {
+app.post('/events', async (req, res) => {
   const { type, data } = req.body;
+
   console.log(`Received event: ${type}`);
 
+  if (type === 'CommentModerated') {
+    const { id, postId, status, version } = data;
+
+    // Find and update the comment
+    const comments = commentsByPostId[postId];
+
+    if (comments) {
+      const comment = comments.find(c => c.id === id);
+
+      if (comment) {
+        const expectedVersion = version
+
+        if(comment.version != expectedVersion){
+          res.send({error:'version conflict'})
+          return
+        }
+
+        comment.status = status;
+        comment.version += 1
+        console.log(`Updated comment ${id} status to: ${status}`);
+
+        // Publish update event
+        await axios.post('http://localhost:4005/events', {
+          type: 'CommentUpdated',
+          data: {
+            id,
+            postId,
+            status,
+            content: comment.content,
+            version: comment.version
+          }
+        }).catch(err => {
+          console.log('Error sending event:', err.message);
+        });
+      }
+    }
+  }
 
   res.send({});
 });

@@ -1,4 +1,3 @@
-// query/index.js
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -7,10 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Combined view of posts and comments
 const posts = {};
 
-// Handle events
 app.post('/events', (req, res) => {
   const { type, data } = req.body;
 
@@ -23,19 +20,38 @@ app.post('/events', (req, res) => {
   }
 
   if (type === 'CommentCreated') {
-    const { id, content, postId } = data;
+    const { id, content, postId, status, version } = data;
     const post = posts[postId];
 
     if (post) {
-      post.comments.push({ id, content });
-      console.log(`Added comment to post ${postId}`);
+      post.comments.push({ id, content, status, version });
+      console.log(`Added comment to post ${postId} (${status})`);
+    }
+  }
+
+  if (type === 'CommentUpdated') {
+    const { id, postId, status, content, version } = data;
+    const post = posts[postId];
+
+    if (post) {
+      const comment = post.comments.find(c => c.id === id);
+
+      if (comment) {
+        if(version <= comment.version){
+          res.send({});
+          return;
+        }
+        comment.status = status;
+        comment.content = content;
+        comment.version += 1
+        console.log(`Updated comment ${id} status to: ${status}`);
+      }
     }
   }
 
   res.send({});
 });
 
-// Get all posts with comments
 app.get('/posts', (req, res) => {
   console.log('Fetching all posts with comments');
   res.send(posts);
@@ -45,12 +61,13 @@ const PORT = 4003;
 
 app.listen(PORT, async () => {
   console.log(`Query Service listening on port ${PORT}`);
-  console.log(`   GET http://localhost:${PORT}/posts`);
 
   // Sync with existing events
   console.log('Syncing with existing events...');
 
   try {
+
+    // as soon as server starts contact event bus and get all events
     const res = await axios.get('http://localhost:4005/events');
 
     for (let event of res.data) {
@@ -62,10 +79,23 @@ app.listen(PORT, async () => {
       }
 
       if (event.type === 'CommentCreated') {
-        const { id, content, postId } = event.data;
+        const { id, content, postId, status, version = 0 } = event.data;
         const post = posts[postId];
         if (post) {
-          post.comments.push({ id, content });
+          post.comments.push({ id, content, status, version });
+        }
+      }
+
+      if (event.type === 'CommentUpdated') {
+        const { id, postId, status, content, version } = event.data;
+        const post = posts[postId];
+        if (post) {
+          const comment = post.comments.find(c => c.id === id);
+          if (comment && version > comment.version) {
+            comment.status = status;
+            comment.content = content;
+            comment.version = version
+          }
         }
       }
     }
