@@ -39,7 +39,7 @@ app.post('/posts/:id/comments', async (req, res) => {
   console.log(`Comment created: ${commentId} on post ${postId}`);
 
   // Publish event to event bus
-  await axios.post('http://localhost:4005/events', {
+  await axios.post('http://event-bus:4005/events', {
     type: 'CommentCreated',
     data: {
       id: commentId,
@@ -82,7 +82,7 @@ app.post('/events', async (req, res) => {
         console.log(`Updated comment ${id} status to: ${status}`);
 
         // Publish update event
-        await axios.post('http://localhost:4005/events', {
+        await axios.post('http://event-bus:4005/events', {
           type: 'CommentUpdated',
           data: {
             id,

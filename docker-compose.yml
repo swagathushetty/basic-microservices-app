@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Event Bus (start first)
+  event-bus:
+    build: ./event-bus
+    ports:
+      - "4005:4005"
+    networks:
+      - microservices-network
+
+  posts:
+    build: ./posts
+    ports:
+      - "4001:4001"
+    networks:
+      - microservices-network
+    #event bus needs to start first before all the services
+    depends_on:
+      - event-bus
+    environment:
+      - EVENT_BUS_URL=http://event-bus:4005
+
+  comments:
+    build: ./comments
+    ports:
+      - "4002:4002"
+    networks:
+      - microservices-network
+    depends_on:
+      - event-bus
+
+  query:
+    build: ./query
+    ports:
+      - "4003:4003"
+    networks:
+      - microservices-network
+    depends_on:
+      - event-bus
+
+  moderation:
+    build: ./moderation
+    ports:
+      - "4004:4004"
+    networks:
+      - microservices-network
+    depends_on:
+      - event-bus
+
+networks:
+  microservices-network:
+    driver: bridge

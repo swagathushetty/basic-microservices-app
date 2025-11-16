@@ -17,10 +17,10 @@ app.post('/events', async (req, res) => {
 
   // Send to all services
   const services = [
-    'http://localhost:4001/events', // Posts
-    'http://localhost:4002/events', // Comments
-    'http://localhost:4003/events', // Query
-    'http://localhost:4004/events', // Moderation
+    'http://posts:4001/events', // Posts
+    'http://comments:4002/events', // Comments
+    'http://query:4003/events', // Query
+    'http://moderation:4004/events', // Moderation
   ];
 
   for (const url of services) {
