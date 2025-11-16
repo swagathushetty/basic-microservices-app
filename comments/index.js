@@ -45,7 +45,8 @@ app.post('/posts/:id/comments', async (req, res) => {
       id: commentId,
       content,
       postId,
-      version:0
+      version:0,
+      status:'pending'
     }
   }).catch(err => {
     console.log('Error sending event:', err.message);
@@ -71,10 +72,10 @@ app.post('/events', async (req, res) => {
       if (comment) {
         const expectedVersion = version
 
-        if(comment.version != expectedVersion){
-          res.send({error:'version conflict'})
-          return
-        }
+        // if(comment.version != expectedVersion){
+        //   res.send({error:'version conflict'})
+        //   return
+        // }
 
         comment.status = status;
         comment.version += 1
