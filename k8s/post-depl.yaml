@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-depl
+spec:
+  replicas: 1                    # How many copies to run
+  selector:
+    matchLabels:
+      app: posts                 # Find pods with this label
+  template:                      # This is the pod template
+    metadata:
+      labels:
+        app: posts               # Label this pod
+    spec:
+      containers:
+        - name: posts
+          image: posts-service:latest
+          imagePullPolicy: Never  # Use local image
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-srv                # This is the DNS name!
+spec:
+  type: ClusterIP                # Internal only
+  selector:
+    app: posts                   # Route to pods with this label
+  ports:
+    - name: posts
+      protocol: TCP
+      port: 4001                 # Service listens on this
+      targetPort: 4001           # Pod listens on this
