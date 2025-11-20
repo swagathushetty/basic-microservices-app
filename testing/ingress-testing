@@ -1,0 +1,28 @@
+
+
+# this assumes you have configured 127.0.0.1 to point to posts.com in hosts file 
+
+
+curl -X POST http://posts.com/posts/xyz789/comments \
+  -H "Content-Type: application/json" \
+  -d '{"content":"Great post!"}'
+
+
+
+
+curl http://posts.com/posts
+
+# Should show comment with status "approved":
+{
+  "xyz789": {
+    "id": "xyz789",
+    "title": "Hello from Ingress!",
+    "comments": [
+      {
+        "id": "abc123",
+        "content": "Great post!",
+        "status": "approved"
+      }
+    ]
+  }
+}
