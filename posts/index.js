@@ -18,7 +18,7 @@ app.get('/posts', (req, res) => {
 });
 
 // Create a post
-app.post('/posts', async (req, res) => {
+app.post('/api/posts/create', async (req, res) => {
   const id = randomBytes(4).toString('hex');
   const { title } = req.body;
 
@@ -58,5 +58,5 @@ const PORT = 4001;
 app.listen(PORT, () => {
   console.log(`Posts Service listening on port ${PORT}`);
   console.log(`   GET  http://localhost:${PORT}/posts`);
-  console.log(`   POST http://localhost:${PORT}/posts`);
+  console.log(`   POST http://localhost:${PORT}/api/posts/create`);
 });

@@ -11,7 +11,7 @@ app.use(cors());
 // { postId: [ { id, content }, ... ] }
 const commentsByPostId = {};
 
-app.get('/posts/:id/comments', (req, res) => {
+app.get('/api/posts/:id/comments', (req, res) => {
   const { id } = req.params;
   const comments = commentsByPostId[id] || [];
 
@@ -20,7 +20,7 @@ app.get('/posts/:id/comments', (req, res) => {
 });
 
 // Create a comment
-app.post('/posts/:id/comments', async (req, res) => {
+app.post('/api/posts/:id/comments', async (req, res) => {
   const commentId = randomBytes(4).toString('hex');
   const { content } = req.body;
   const { id: postId } = req.params;
@@ -39,7 +39,7 @@ app.post('/posts/:id/comments', async (req, res) => {
   console.log(`Comment created: ${commentId} on post ${postId}`);
 
   // Publish event to event bus
-  await axios.post('http://event-bus:4005/events', {
+  await axios.post('http://event-bus-srv:4005/events', {
     type: 'CommentCreated',
     data: {
       id: commentId,

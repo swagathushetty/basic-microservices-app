@@ -11,17 +11,24 @@ spec:
     - host: posts.com
       http:
         paths:
-          # Route 1: Create posts (POST only)
-          - path: /posts
-            pathType: Exact
+            # react app
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-srv
+                port:
+                  number: 3000
+
+          - path: /api/posts/create
+            pathType: Prefix
             backend:
               service:
                 name: posts-srv
                 port:
                   number: 4001
 
-          # Route 2: Create comments (regex to match /posts/xyz123/comments)
-          - path: /posts/?(.*)/comments
+          - path: /api/posts/?(.*)/comments
             pathType: ImplementationSpecific
             backend:
               service:
@@ -29,8 +36,7 @@ spec:
                 port:
                   number: 4002
 
-          # Route 3: Get posts (GET only - must come last!)
-          - path: /posts
+          - path: /api/posts
             pathType: Prefix
             backend:
               service:

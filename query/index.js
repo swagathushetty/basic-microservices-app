@@ -52,7 +52,7 @@ app.post('/events', (req, res) => {
   res.send({});
 });
 
-app.get('/posts', (req, res) => {
+app.get('/api/posts', (req, res) => {
   console.log('Fetching all posts with comments');
   res.send(posts);
 });
